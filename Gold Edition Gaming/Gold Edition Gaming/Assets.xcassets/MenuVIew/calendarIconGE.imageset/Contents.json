@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "calendarIconGE.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
