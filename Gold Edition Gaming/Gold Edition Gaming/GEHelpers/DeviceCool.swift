@@ -1,7 +1,7 @@
 import UIKit
 
-class DeviceCool {
-    static let shared = DeviceCool()
+class GEDeviceManager {
+    static let shared = GEDeviceManager()
     
     var deviceType: UIUserInterfaceIdiom
     

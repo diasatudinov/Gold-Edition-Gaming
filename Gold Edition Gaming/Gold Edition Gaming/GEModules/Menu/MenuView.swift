@@ -8,123 +8,118 @@
 import SwiftUI
 
 struct MenuView: View {
-    @State private var showAIGame = false
-    @State private var showPlayerGame = false
+    @State private var showGame = false
     @State private var showShop = false
-    @State private var showHowToPlay = false
+    @State private var showAchievement = false
+    @State private var showCalendar = false
     @State private var showSettings = false
     
-    @StateObject var shopVM = SVM()
-    @StateObject var settingsVM = SM()
+    //    @StateObject var shopVM = SVM()
+        @StateObject var settingsVM = SettingsViewModelGE()
     
     var body: some View {
         
-        GeometryReader { geometry in
-            ZStack {
-                VStack(spacing: 0) {
-                    HStack {
+        ZStack {
+            VStack(spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        MoneyBgGE()
                         
-                        Image(.progressIcon)
+                        Button {
+                            showCalendar = true
+                        } label: {
+                            Image(.calendarIconGE)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: GEDeviceManager.shared.deviceType == .pad ? 160:80)
+                        }
+                    }
+                    Spacer()
+                    
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(.settingsIconGE)
                             .resizable()
                             .scaledToFit()
-                            .frame(height: DeviceCool.shared.deviceType == .pad ? 140:70)
-                        
-                        Spacer()
-                        
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Image(.settingsIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceCool.shared.deviceType == .pad ? 140:70)
-                        }
+                            .frame(height: GEDeviceManager.shared.deviceType == .pad ? 140:70)
                     }
-                    Spacer()
-                    
-                    HStack {
-                        Button {
-                            showAIGame = true
-                        } label: {
-                            Image(.playAIIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceCool.shared.deviceType == .pad ?400:200)
-                        }
-                        
-                        Button {
-                            showPlayerGame = true
-                        } label: {
-                            Image(.playIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceCool.shared.deviceType == .pad ? 400:200)
-                        }
-                    }
-                    
-                    Spacer()
-                    HStack {
-                        Button {
-                            showShop = true
-                        } label: {
-                            Image(.shopIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceCool.shared.deviceType == .pad ? 180:90)
-                        }
-                        Spacer()
-                        Button {
-                            showHowToPlay = true
-                        } label: {
-                            Image(.rulesIcon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: DeviceCool.shared.deviceType == .pad ? 180:90)
-                        }
-                        
-                    }
-                }.padding()
-            }
-            .background(
-                ZStack {
-                    Image(.menuBg)
+                }
+                
+                
+                Spacer()
+                Button {
+                    showGame = true
+                } label: {
+                    Image(.playIconGE)
                         .resizable()
-                        .edgesIgnoringSafeArea(.all)
-                        .scaledToFill()
+                        .scaledToFit()
+                        .frame(height: GEDeviceManager.shared.deviceType == .pad ? 240:120)
                 }
                 
-            )
-            .onAppear {
-                if settingsVM.musicEnabled {
-                    MusicPlayer.shared.playBackgroundMusic()
-                }
-            }
-            .onChange(of: settingsVM.musicEnabled) { enabled in
-                if enabled {
-                    MusicPlayer.shared.playBackgroundMusic()
-                } else {
-                    MusicPlayer.shared.stopBackgroundMusic()
-                }
-            }
-            .fullScreenCover(isPresented: $showAIGame) {
-                GameView(shopVM: shopVM, opponentState: .ai)
-            }
-            .fullScreenCover(isPresented: $showPlayerGame) {
-                GameView(shopVM: shopVM, opponentState: .player)
-            }
-            .fullScreenCover(isPresented: $showHowToPlay) {
-                RuleV()
-            }
-            .fullScreenCover(isPresented: $showShop) {
-                ShopV(shopVM: shopVM)
+                Spacer()
                 
-            }
-            .fullScreenCover(isPresented: $showSettings) {
-                SV(settings: settingsVM)
                 
+                HStack {
+                    
+                    
+                    Button {
+                        showShop = true
+                    } label: {
+                        Image(.shopIconGE)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: GEDeviceManager.shared.deviceType == .pad ? 180:90)
+                    }
+                    Spacer()
+                    Button {
+                        showAchievement = true
+                    } label: {
+                        Image(.achievementsIconGE)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: GEDeviceManager.shared.deviceType == .pad ? 180:90)
+                    }
+                }
+            }.padding()
+        }
+        .background(
+            ZStack {
+                Image(.menuBgGE)
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .scaledToFill()
             }
+        )
+        //            .onAppear {
+        //                if settingsVM.musicEnabled {
+        //                    MusicPlayer.shared.playBackgroundMusic()
+        //                }
+        //            }
+        //            .onChange(of: settingsVM.musicEnabled) { enabled in
+        //                if enabled {
+        //                    MusicPlayer.shared.playBackgroundMusic()
+        //                } else {
+        //                    MusicPlayer.shared.stopBackgroundMusic()
+        //                }
+        //            }
+        .fullScreenCover(isPresented: $showGame) {
+            SelectGameView()
+        }
+        .fullScreenCover(isPresented: $showCalendar) {
             
         }
+        .fullScreenCover(isPresented: $showAchievement) {
+            
+        }
+        .fullScreenCover(isPresented: $showShop) {
+            
+        }
+        .fullScreenCover(isPresented: $showSettings) {
+            SettingsView(settingsVM: settingsVM)
+        }
+        
+        
         
         
     }
