@@ -14,7 +14,7 @@ struct MenuView: View {
     @State private var showCalendar = false
     @State private var showSettings = false
     
-    //    @StateObject var shopVM = SVM()
+        @StateObject var achievementVM = AchievementsViewModel()
         @StateObject var settingsVM = SettingsViewModelGE()
     
     var body: some View {
@@ -58,7 +58,6 @@ struct MenuView: View {
                 }
                 
                 Spacer()
-                
                 
                 HStack {
                     
@@ -110,7 +109,7 @@ struct MenuView: View {
             
         }
         .fullScreenCover(isPresented: $showAchievement) {
-            
+            AchievementsView(viewModel: achievementVM)
         }
         .fullScreenCover(isPresented: $showShop) {
             
