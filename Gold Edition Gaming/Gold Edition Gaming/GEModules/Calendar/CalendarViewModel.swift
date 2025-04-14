@@ -5,32 +5,20 @@
 //  Created by Dias Atudinov on 14.04.2025.
 //
 
+import SwiftUI
 
-class AchievementsViewModel: ObservableObject {
+
+class CalendarViewModel: ObservableObject {
     
-    @Published var achievements: [Achievement] = [
-        Achievement(image: "achievement1", category: .overall, isAchieved: false),
-        Achievement(image: "achievement2", category: .overall, isAchieved: false),
-        Achievement(image: "achievement3", category: .overall, isAchieved: false),
-        Achievement(image: "achievement4", category: .overall, isAchieved: false),
-        Achievement(image: "achievement5", category: .overall, isAchieved: false),
-        
-        Achievement(image: "achievement6", category: .strategic, isAchieved: false),
-        Achievement(image: "achievement7", category: .strategic, isAchieved: false),
-        Achievement(image: "achievement8", category: .strategic, isAchieved: false),
-        Achievement(image: "achievement9", category: .strategic, isAchieved: false),
-        Achievement(image: "achievement10", category: .strategic, isAchieved: false),
-        
-        Achievement(image: "achievement11", category: .special, isAchieved: false),
-        Achievement(image: "achievement12", category: .special, isAchieved: false),
-        Achievement(image: "achievement13", category: .special, isAchieved: false),
-        Achievement(image: "achievement14", category: .special, isAchieved: false),
-        Achievement(image: "achievement15", category: .special, isAchieved: false),
-        
-        Achievement(image: "achievement16", category: .collectible, isAchieved: false),
-        Achievement(image: "achievement17", category: .collectible, isAchieved: false),
-        Achievement(image: "achievement18", category: .collectible, isAchieved: false),
-        Achievement(image: "achievement19", category: .collectible, isAchieved: false),
+    @Published var bonuses: [Bonus] = [
+        Bonus(day: 1, amount: 50, isCollected: false),
+        Bonus(day: 2, amount: 100, isCollected: false),
+        Bonus(day: 3, amount: 100, isCollected: false),
+        Bonus(day: 4, amount: 150, isCollected: false),
+        Bonus(day: 5, amount: 150, isCollected: false),
+        Bonus(day: 6, amount: 200, isCollected: false),
+        Bonus(day: 7, amount: 200, isCollected: false),
+    
     ] {
         didSet {
             saveAchievementsItem()
@@ -42,30 +30,43 @@ class AchievementsViewModel: ObservableObject {
         
     }
     
-    private let userDefaultsAchievementsKey = "userDefaultsAchievementsKey"
+    private let userDefaultsBonusesKey = "userDefaultsBonusesKey"
     
-    func achieveToggle(_ achive: Achievement) {
-        guard let index = achievements.firstIndex(where: { $0.id == achive.id })
-        else {
+    func resetBonuses() {
+        for index in Range(0...bonuses.count - 1) {
+            bonuses[index].isCollected = false
+        }
+    }
+    
+    func bonusesToggle(_ bonus: Bonus) {
+        guard let index = bonuses.firstIndex(where: { $0.id == bonus.id }) else {
             return
         }
-        achievements[index].isAchieved.toggle()
+        
+        bonuses[index].isCollected.toggle()
         
     }
     
     func saveAchievementsItem() {
-        if let encodedData = try? JSONEncoder().encode(achievements) {
-            UserDefaults.standard.set(encodedData, forKey: userDefaultsAchievementsKey)
+        if let encodedData = try? JSONEncoder().encode(bonuses) {
+            UserDefaults.standard.set(encodedData, forKey: userDefaultsBonusesKey)
         }
         
     }
     
     func loadAchievementsItem() {
-        if let savedData = UserDefaults.standard.data(forKey: userDefaultsAchievementsKey),
-           let loadedItem = try? JSONDecoder().decode([Achievement].self, from: savedData) {
-            achievements = loadedItem
+        if let savedData = UserDefaults.standard.data(forKey: userDefaultsBonusesKey),
+           let loadedItem = try? JSONDecoder().decode([Bonus].self, from: savedData) {
+            bonuses = loadedItem
         } else {
             print("No saved data found")
         }
     }
+}
+
+struct Bonus: Codable, Hashable {
+    var id = UUID()
+    var day: Int
+    var amount: Int
+    var isCollected: Bool
 }
