@@ -12,9 +12,11 @@ class TwoPlayersGameViewModel: ObservableObject {
     @Published var currentPlayer: Player = .attacker
     @Published var isDefenderWin = false
     
+    private var moveHistory: [([[Piece]], Player)] = []
+    
     var audioPlayer: AVAudioPlayer?
     
-    let settingsVM = SettingsViewModelSL()
+    let settingsVM = SettingsViewModelGE()
     init() {
         setupBoard()
     }
@@ -25,19 +27,20 @@ class TwoPlayersGameViewModel: ObservableObject {
         gameResult = ""
         selectedCell = nil
         currentPlayer = .attacker
+        moveHistory.removeAll()
         setupBoard()
     }
     
     func playTapSound() {
-        if settingsVM.soundEnabled {
-            guard let url = Bundle.main.url(forResource: "clickSoundSL", withExtension: "mp3") else { return }
-            do {
-                audioPlayer = try AVAudioPlayer(contentsOf: url)
-                audioPlayer?.play()
-            } catch {
-                print("Ошибка воспроизведения звука: \(error)")
-            }
-        }
+                if settingsVM.soundEnabled {
+                    guard let url = Bundle.main.url(forResource: "stepSoundGE", withExtension: "mp3") else { return }
+                    do {
+                        audioPlayer = try AVAudioPlayer(contentsOf: url)
+                        audioPlayer?.play()
+                    } catch {
+                        print("Ошибка воспроизведения звука: \(error)")
+                    }
+                }
     }
     
     func isCorner(row: Int, col: Int) -> Bool {
@@ -48,16 +51,13 @@ class TwoPlayersGameViewModel: ObservableObject {
     }
     
     func setupBoard() {
-        // Reset board
         board = Array(
             repeating: Array(repeating: Piece(type: .none), count: 11),
             count: 11
         )
         let center = 5
-        // Place king at center.
         board[center][center] = Piece(type: .king)
         
-        // Setup defenders (they use the default defender appearance).
         let defenders: [(Int, Int)] = [
             (center - 1, center), (center + 1, center),
             (center, center - 1), (center, center + 1),
@@ -71,23 +71,18 @@ class TwoPlayersGameViewModel: ObservableObject {
             board[pos.0][pos.1] = Piece(type: .defender)
         }
         
-        // Setup attackers on the board edges.
-        // We assign an attackerSide based on the attacker's position.
         let attackersPositions: [(Int, Int)] = [
-            // Top edge – facing down (south)
             (0, 3), (0, 4), (0, 5), (0, 6), (0, 7),
-            // Bottom edge – facing up (north)
             (10, 3), (10, 4), (10, 5), (10, 6), (10, 7),
-            // Left edge – facing right (east)
             (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
-            // Right edge – facing left (west)
             (3, 10), (4, 10), (5, 10), (6, 10), (7, 10),
-            // Additional positions:
-            (1, 5),  // near top -> south
-            (5, 1),  // near left -> east
-            (9, 5),  // near bottom -> north
-            (5, 9)   // near right -> west
+            
+            (1, 5),
+            (5, 1),
+            (9, 5),
+            (5, 9)
         ]
+        
         for pos in attackersPositions {
             if isCorner(row: pos.0, col: pos.1) { continue }
             let side: AttackerSide
@@ -100,7 +95,7 @@ class TwoPlayersGameViewModel: ObservableObject {
             } else if pos.1 == 10 || pos.1 == 9 {
                 side = .umbrellaFigureSL
             } else {
-                side = .triangleFigureSL // default fallback
+                side = .triangleFigureSL
             }
             board[pos.0][pos.1] = Piece(type: .attacker, attackerSide: side)
         }
@@ -117,7 +112,6 @@ class TwoPlayersGameViewModel: ObservableObject {
     }
     
     func movePiece(from: (Int, Int), to: (Int, Int)) {
-        // For brevity, the same validations are applied.
         if board[to.0][to.1].type != .none { return }
         if isCorner(row: to.0, col: to.1) {
             if board[from.0][from.1].type != .king { return }
@@ -128,28 +122,37 @@ class TwoPlayersGameViewModel: ObservableObject {
         let movingPiece = board[from.0][from.1]
         if !isPieceBelongsToCurrentPlayer(movingPiece) { return }
         
+        moveHistory.append((board, currentPlayer))
+        
         board[from.0][from.1] = Piece(type: .none)
         board[to.0][to.1] = movingPiece
-
+        
         playTapSound()
         
-        // If the king moved to a corner, handle victory.
         if movingPiece.type == .king && isCorner(row: to.0, col: to.1) {
             gameOver = true
             isDefenderWin = true
+            GEUser.shared.updateUserMoney(for: 200)
             gameResult = "Defenders win! The king has escaped."
-            SLUser.shared.updateUserBirds(for: 2000)
             return
         }
-
-        // Check for captures around the destination.
+        
         checkCaptures(around: to, movingPiece: movingPiece)
-        // Check if the king is captured.
         checkKingCapture()
-        // Switch turn if the game is not over.
+        
         if !gameOver {
             switchTurn()
         }
+    }
+    
+    func undoLastMove() {
+        guard let last = moveHistory.popLast() else { return }
+        self.board = last.0
+        self.currentPlayer = last.1
+        self.selectedCell = nil
+        self.gameOver = false
+        self.gameResult = ""
+        self.isDefenderWin = false
     }
     
     func switchTurn() {
@@ -171,9 +174,7 @@ class TwoPlayersGameViewModel: ObservableObject {
         return true
     }
     
-    // Capture logic for regular pieces
     func checkCaptures(around pos: (Int, Int), movingPiece: Piece) {
-        // Four cardinal directions: right, down, left, up
         let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
         for direction in directions {
             let enemyRow = pos.0 + direction.0
@@ -181,17 +182,14 @@ class TwoPlayersGameViewModel: ObservableObject {
             let allyRow = enemyRow + direction.0
             let allyCol = enemyCol + direction.1
             
-            // Ensure both positions are within board limits.
             if isValid(row: enemyRow, col: enemyCol) && isValid(row: allyRow, col: allyCol) {
                 let enemyPiece = board[enemyRow][enemyCol]
-                // Check if the enemy piece exists, is not none, is not the king,
-                // and does not belong to the same side as the moving piece.
+                
                 if enemyPiece.type != .none &&
                     enemyPiece.type != movingPiece.type &&
                     enemyPiece.type != .king {
                     let allyPiece = board[allyRow][allyCol]
-                    // If the cell beyond the enemy piece is either occupied by a friendly piece,
-                    // is the king, or is a corner cell (which counts as a barrier), remove the enemy.
+                    
                     if allyPiece.type == movingPiece.type || allyPiece.type == .king || isCorner(row: allyRow, col: allyCol) {
                         board[enemyRow][enemyCol] = Piece(type: .none)
                     }
@@ -200,9 +198,7 @@ class TwoPlayersGameViewModel: ObservableObject {
         }
     }
     
-    // Capture logic for the king piece
     func checkKingCapture() {
-        // Find the king's position on the board.
         for row in 0..<11 {
             for col in 0..<11 {
                 if board[row][col].type == .king {
@@ -211,23 +207,20 @@ class TwoPlayersGameViewModel: ObservableObject {
                     for direction in directions {
                         let adjRow = row + direction.0
                         let adjCol = col + direction.1
-                        // If the adjacent cell is off the board, count it as a barrier.
                         if !isValid(row: adjRow, col: adjCol) {
                             surroundCount += 1
                         }
-                        // Otherwise, if the adjacent cell is occupied by an attacker or is a corner cell, count it.
                         else if board[adjRow][adjCol].type == .attacker || isCorner(row: adjRow, col: adjCol) {
                             surroundCount += 1
                         }
                     }
-                    // Determine how many sides need to be blocked.
                     let required = isOnEdge(row: row, col: col) ? 3 : 4
                     if surroundCount >= required {
                         gameOver = true
                         isDefenderWin = false
                         gameResult = "Attackers win! King captured."
                     }
-                    return // Once the king is found and evaluated, exit.
+                    return
                 }
             }
         }
