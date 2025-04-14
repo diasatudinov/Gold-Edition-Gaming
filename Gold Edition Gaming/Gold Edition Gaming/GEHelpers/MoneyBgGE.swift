@@ -1,14 +1,7 @@
-//
-//  MoneyBgGE.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 11.04.2025.
-//
-
 import SwiftUI
 
 struct MoneyBgGE: View {
-    @StateObject var user = DCUser.shared
+    @StateObject var user = GEUser.shared
     var body: some View {
         ZStack {
             Image(.moneyBgGE)
