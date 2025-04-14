@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "peronIcon1GE.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
