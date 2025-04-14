@@ -1,10 +1,3 @@
-//
-//  MenuView.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 11.04.2025.
-//
-
 import SwiftUI
 
 struct MenuView: View {
@@ -17,6 +10,7 @@ struct MenuView: View {
     @StateObject var achievementVM = AchievementsViewModel()
     @StateObject var settingsVM = SettingsViewModelGE()
     @StateObject var calendarVM = CalendarViewModel()
+    @StateObject var shopVM = ShopViewModelGE()
     
     var body: some View {
         
@@ -91,20 +85,20 @@ struct MenuView: View {
                     .scaledToFill()
             }
         )
-        //            .onAppear {
-        //                if settingsVM.musicEnabled {
-        //                    MusicPlayer.shared.playBackgroundMusic()
-        //                }
-        //            }
-        //            .onChange(of: settingsVM.musicEnabled) { enabled in
-        //                if enabled {
-        //                    MusicPlayer.shared.playBackgroundMusic()
-        //                } else {
-        //                    MusicPlayer.shared.stopBackgroundMusic()
-        //                }
-        //            }
+                    .onAppear {
+                        if settingsVM.musicEnabled {
+                            GEMusicManager.shared.playBackgroundMusic()
+                        }
+                    }
+                    .onChange(of: settingsVM.musicEnabled) { enabled in
+                        if enabled {
+                            GEMusicManager.shared.playBackgroundMusic()
+                        } else {
+                            GEMusicManager.shared.stopBackgroundMusic()
+                        }
+                    }
         .fullScreenCover(isPresented: $showGame) {
-            SelectGameView()
+            SelectGameView(shopVM: shopVM)
         }
         .fullScreenCover(isPresented: $showCalendar) {
             CalendarView(viewModel: calendarVM)
@@ -113,7 +107,7 @@ struct MenuView: View {
             AchievementsView(viewModel: achievementVM)
         }
         .fullScreenCover(isPresented: $showShop) {
-            
+            ShopViewGE(viewModel: shopVM)
         }
         .fullScreenCover(isPresented: $showSettings) {
             SettingsView(settingsVM: settingsVM)

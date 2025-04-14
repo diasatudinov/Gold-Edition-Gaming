@@ -13,9 +13,9 @@ struct RootViewDC: View {
             } else {
                 VStack {
                     if isLoading {
-                        SplashScreen()
+                        LoaderView()
                     } else {
-                        MenuViewDC()
+                        MenuView()
                             .onAppear {
                                 AppDelegate.orientationLock = .landscape
                                 setOrientation(.landscapeRight)
@@ -29,8 +29,9 @@ struct RootViewDC: View {
             }
         }
         .onAppear {
-            updateIfNeeded()
-            print("\(Links.shared.finalURL)")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+                updateIfNeeded()
+            }
            
         }
     }
