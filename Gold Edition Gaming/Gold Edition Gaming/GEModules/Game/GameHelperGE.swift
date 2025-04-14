@@ -1,11 +1,3 @@
-//
-//  PieceType.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 14.04.2025.
-//
-
-
 import SwiftUI
 
 enum PieceType {
@@ -31,6 +23,8 @@ struct Piece {
 
 // Представление отдельной клетки
 struct CellView: View {
+    @StateObject var shopVM = ShopViewModelGE()
+    
     var row: Int
     var col: Int
     var piece: Piece
@@ -44,27 +38,28 @@ struct CellView: View {
     var body: some View {
         ZStack {
             Rectangle()
-                .fill(isCorner ? Color.purple.opacity(0.5) : (isSelected ? Color.green.opacity(0.3) : Color.clear))
-                .frame(width: SLDeviceInfo.shared.deviceType == .pad ? 60:30, height: SLDeviceInfo.shared.deviceType == .pad ? 60:30)
-                .border(Color.appPurple, width: SLDeviceInfo.shared.deviceType == .pad ? 4:2)
-            
-            // For attackers, show the proper image; for others, fallback to a circle.
-            if piece.type == .attacker, let side = piece.attackerSide {
-                Image("\(side.rawValue)")
-                    .resizable()
-                    .frame(width: SLDeviceInfo.shared.deviceType == .pad ? 40:20, height: SLDeviceInfo.shared.deviceType == .pad ? 40:20)
-            } else if piece.type == .defender {
-                Image(.attackerFigureSL)
-                    .resizable()
-                    .frame(width: SLDeviceInfo.shared.deviceType == .pad ? 40:20, height: SLDeviceInfo.shared.deviceType == .pad ? 40:20)
-            } else if piece.type == .king {
-                Image(.kingFigureSL)
-                    .resizable()
-                    .frame(width: SLDeviceInfo.shared.deviceType == .pad ? 40:20, height: SLDeviceInfo.shared.deviceType == .pad ? 40:20)
-            } else if piece.type != .none {
-                Circle()
-                    .fill(colorForPiece(piece.type))
-                    .frame(width: SLDeviceInfo.shared.deviceType == .pad ? 40:20, height: SLDeviceInfo.shared.deviceType == .pad ? 40:20)
+                .fill((isSelected ? Color.green.opacity(0.3) : chessboardColor(row: row, col: col)))
+                .frame(width: GEDeviceManager.shared.deviceType == .pad ? 60:30, height: GEDeviceManager.shared.deviceType == .pad ? 60:30)
+                .border(Color.black.opacity(0.2), width: GEDeviceManager.shared.deviceType == .pad ? 2:1)
+                .opacity(isCorner ? 0.5:1)
+            if let currentPerson = shopVM.currentPersonItem {
+                if piece.type == .attacker {
+                    Image(currentPerson.attackerIcon)
+                        .resizable()
+                        .frame(width: GEDeviceManager.shared.deviceType == .pad ? 60:30, height: GEDeviceManager.shared.deviceType == .pad ? 60:30)
+                } else if piece.type == .defender {
+                    Image(currentPerson.defenderIcon)
+                        .resizable()
+                        .frame(width: GEDeviceManager.shared.deviceType == .pad ? 60:30, height: GEDeviceManager.shared.deviceType == .pad ? 60:30)
+                } else if piece.type == .king {
+                    Image(currentPerson.kingIcon)
+                        .resizable()
+                        .frame(width: GEDeviceManager.shared.deviceType == .pad ? 60:30, height: GEDeviceManager.shared.deviceType == .pad ? 60:30)
+                } else if piece.type != .none {
+                    Circle()
+                        .fill(colorForPiece(piece.type))
+                        .frame(width: GEDeviceManager.shared.deviceType == .pad ? 60:30, height: GEDeviceManager.shared.deviceType == .pad ? 60:30)
+                }
             }
         }
     }
@@ -80,5 +75,22 @@ struct CellView: View {
         default:
             return .clear
         }
+    }
+    
+    func chessboardColor(row: Int, col: Int) -> Color {
+        guard let currentPerson = shopVM.currentPersonItem else { return .clear }
+        switch currentPerson.name {
+        case "person1":
+            return (row + col).isMultiple(of: 2) ? Color.appMint : Color.appBrown
+        case "person2":
+            return (row + col).isMultiple(of: 2) ? Color.appPink : Color.appYellow
+        case "person3":
+            return (row + col).isMultiple(of: 2) ? Color.appBlue : Color.appYellow
+        case "person4":
+            return (row + col).isMultiple(of: 2) ? Color.appRed : Color.appYellow
+        default:
+            return (row + col).isMultiple(of: 2) ? Color.appMint : Color.appBrown
+        }
+       
     }
 }

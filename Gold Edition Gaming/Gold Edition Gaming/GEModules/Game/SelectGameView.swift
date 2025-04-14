@@ -1,14 +1,9 @@
-//
-//  SelectGameView.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 11.04.2025.
-//
-
 import SwiftUI
 
 struct SelectGameView: View {
     @Environment(\.presentationMode) var presentationMode
+    
+    @ObservedObject var shopVM: ShopViewModelGE
     
     @State private var showAiGame = false
     @State private var showTwoPlayerGame = false
@@ -73,14 +68,17 @@ struct SelectGameView: View {
             }
         )
         .fullScreenCover(isPresented: $showAiGame) {
+            AgainstAiView(shopVM: shopVM)
         }
         .fullScreenCover(isPresented: $showTwoPlayerGame) {
+            TwoPlayersView(shopVM: shopVM)
         }
         .fullScreenCover(isPresented: $showOnlineGame) {
+            AgainstAiView(shopVM: shopVM)
         }
     }
 }
 
 #Preview {
-    SelectGameView()
+    SelectGameView(shopVM: ShopViewModelGE())
 }

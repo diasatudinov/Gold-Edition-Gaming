@@ -1,19 +1,11 @@
-//
-//  CalendarView.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 14.04.2025.
-//
-
 import SwiftUI
 
 struct CalendarView: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject var user = DCUser.shared
+    @StateObject var user = GEUser.shared
     @ObservedObject var viewModel: CalendarViewModel
     @State private var timer: Timer?
     
-    @State private var message: String = ""
     @State private var bonusAmount = 0
     @State private var showAnimation = false
     let defaults = UserDefaults.standard
@@ -34,14 +26,14 @@ struct CalendarView: View {
                         .resizable()
                         .scaledToFit()
                     HStack {
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: GEDeviceManager.shared.deviceType == .pad ? 32:16) {
                             ForEach(viewModel.bonuses, id: \.self) { bonus in
                                 if bonus.day < 7 {
                                     VStack {
                                         Image("dayText\(bonus.day)")
                                             .resizable()
                                             .scaledToFit()
-                                            .frame(height: 25)
+                                            .frame(height: GEDeviceManager.shared.deviceType == .pad ? 50:25)
                                         ZStack {
                                             Image(bonus.isCollected ? .openedBoxBgGE:.closedBoxBgGE)
                                                 .resizable()
@@ -50,7 +42,7 @@ struct CalendarView: View {
                                             Image(bonus.isCollected ? .openedBoxGE:.closedBoxGE)
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(width: 75,height: 75)
+                                                .frame(width: GEDeviceManager.shared.deviceType == .pad ? 150:75,height: GEDeviceManager.shared.deviceType == .pad ? 150:75)
                                             
                                             if bonus.isCollected {
                                                 VStack {
@@ -60,8 +52,8 @@ struct CalendarView: View {
                                                         Image(.stickGE)
                                                             .resizable()
                                                             .scaledToFit()
-                                                            .frame(height: 40)
-                                                            .offset(x: 10, y: 10)
+                                                            .frame(height: GEDeviceManager.shared.deviceType == .pad ? 80:40)
+                                                            .offset(x: GEDeviceManager.shared.deviceType == .pad ? 20:10, y: GEDeviceManager.shared.deviceType == .pad ? 20:10)
                                                     }
                                                 }
                                             } else {
@@ -81,7 +73,7 @@ struct CalendarView: View {
                                                                 Image(.getBtnGE)
                                                                     .resizable()
                                                                     .scaledToFit()
-                                                                    .frame(height: 40)
+                                                                    .frame(height: GEDeviceManager.shared.deviceType == .pad ? 80:40)
                                                             }
                                                         }
                                                         
@@ -96,18 +88,18 @@ struct CalendarView: View {
                                                 }
                                             }
                                             
-                                        }.frame(width: 100,height: 100)
+                                        }.frame(width: GEDeviceManager.shared.deviceType == .pad ? 200:100,height: GEDeviceManager.shared.deviceType == .pad ? 200:100)
                                     }
                                 }
                                 
                             }
-                        }.frame(width: 400)
+                        }.frame(width: GEDeviceManager.shared.deviceType == .pad ? 800:400)
                         
                         VStack {
                             Image("dayText\(viewModel.bonuses[6].day)")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(height: 35)
+                                .frame(height: GEDeviceManager.shared.deviceType == .pad ? 70:35)
                             ZStack {
                                 Image(viewModel.bonuses[6].isCollected ? .openedBoxBgGE:.closedBoxBgGE)
                                     .resizable()
@@ -116,7 +108,7 @@ struct CalendarView: View {
                                 Image(viewModel.bonuses[6].isCollected ? .openedBoxGE:.closedSuperBoxGE)
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 100,height: 100)
+                                    .frame(width: GEDeviceManager.shared.deviceType == .pad ? 200:100, height: GEDeviceManager.shared.deviceType == .pad ? 200:100)
                                 
                                 if viewModel.bonuses[6].isCollected {
                                     VStack {
@@ -126,8 +118,8 @@ struct CalendarView: View {
                                             Image(.stickGE)
                                                 .resizable()
                                                 .scaledToFit()
-                                                .frame(height: 60)
-                                                .offset(x: 15, y: 15)
+                                                .frame(height: GEDeviceManager.shared.deviceType == .pad ? 120:60)
+                                                .offset(x: GEDeviceManager.shared.deviceType == .pad ? 30:15, y: GEDeviceManager.shared.deviceType == .pad ? 30:15)
                                         }
                                     }
                                 } else {
@@ -148,7 +140,7 @@ struct CalendarView: View {
                                                     Image(.getBtnGE)
                                                         .resizable()
                                                         .scaledToFit()
-                                                        .frame(height: 70)
+                                                        .frame(height: GEDeviceManager.shared.deviceType == .pad ? 140:70)
                                                 }
                                             }
                                             
@@ -163,10 +155,10 @@ struct CalendarView: View {
                                     }
                                 }
                                 
-                            }.frame(width: 150, height: 150)
+                            }.frame(width: GEDeviceManager.shared.deviceType == .pad ? 300:150, height: GEDeviceManager.shared.deviceType == .pad ? 300:150)
                         }
                         
-                    }.padding(.top, 48)
+                    }.padding(.top, GEDeviceManager.shared.deviceType == .pad ? 96:48)
                 }
                 
             }
@@ -178,12 +170,12 @@ struct CalendarView: View {
                             .scaledToFit()
                         
                         Text("+\(bonusAmount)")
-                            .font(.system(size: 50, weight: .bold))
+                            .font(.system(size: GEDeviceManager.shared.deviceType == .pad ? 100:50, weight: .bold))
                             .foregroundStyle(.yellow)
-                            .offset(x: 40, y: 30)
+                            .offset(x: GEDeviceManager.shared.deviceType == .pad ? 80:40, y: GEDeviceManager.shared.deviceType == .pad ? 60:30)
                     }.scaleEffect(showAnimation ? 1 : 0)
                         .animation(.easeOut(duration: 3), value: showAnimation)
-                }.frame(width: 300, height: 300)
+                }.frame(width: GEDeviceManager.shared.deviceType == .pad ? 600:300, height: GEDeviceManager.shared.deviceType == .pad ? 600:300)
                 
             }
             
@@ -254,24 +246,16 @@ struct CalendarView: View {
                 openBonus = 1
                 viewModel.resetBonuses()
             }
-            message = "24 hours"
-            print("✅ 24 hours passed, bonus granted")
-            print("🎁 openBonus: \(openBonus)")
             
-            // Reset the timer reference point
             defaults.set(Date(), forKey: "lastOpenTime")
-        } else {
-            print("⏳ Not yet 24 hours, keep waiting")
         }
     }
     
     func startRepeatingCheck() {
-        recordLastOpenTimeIfNeeded() // Ensure it's set once
+        recordLastOpenTimeIfNeeded()
         
-        // Initial check on open
         check24HourStatus()
         
-        // Then repeat check every 60 seconds
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
             self.check24HourStatus()
         }
