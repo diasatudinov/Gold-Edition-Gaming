@@ -1,61 +1,83 @@
-//
-//  ShopViewModelGE.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 14.04.2025.
-//
-
-
 import SwiftUI
 
 class ShopViewModelGE: ObservableObject {
     @Published var shopTeamItems: [Item] = [
         
-        Item(name: "Item 1", image: "loadingViewBgSL", icon: "itemIcon1"),
-        Item(name: "Item 2", image: "itemImage2", icon: "itemIcon2"),
-        Item(name: "Item 3", image: "gameTypeBgSL", icon: "itemIcon3"),
-        Item(name: "Item 4", image: "settingsViewBgSL", icon: "itemIcon4"),
-        Item(name: "Item 5", image: "ItemImage5", icon: "itemIcon5"),
-        Item(name: "Item 6", image: "ItemImage6", icon: "itemIcon6"),
+        Item(name: "bg1", image: "gameBg1GE", icon: "icon1GE", section: .backgrounds, price: 500),
+        Item(name: "bg2", image: "gameBg4GE", icon: "icon2GE", section: .backgrounds, price: 500),
+        Item(name: "bg3", image: "gameBg3GE", icon: "icon3GE", section: .backgrounds, price: 500),
+        Item(name: "bg4", image: "gameBg2GE", icon: "icon4GE", section: .backgrounds, price: 500),
+
+        Item(name: "person1", image: "gamePerson1GE", icon: "peronIcon1GE", section: .persons, price: 200, attackerIcon: "attackerType1", defenderIcon: "defenderType1", kingIcon: "kingType1"),
+        Item(name: "person2", image: "gamePerson2GE", icon: "peronIcon2GE", section: .persons, price: 200, attackerIcon: "attackerType2", defenderIcon: "defenderType2", kingIcon: "kingType2"),
+        Item(name: "person3", image: "gamePerson3GE", icon: "peronIcon3GE", section: .persons, price: 200, attackerIcon: "attackerType3", defenderIcon: "defenderType3", kingIcon: "kingType3"),
+        Item(name: "person4", image: "gamePerson4GE", icon: "peronIcon4GE", section: .persons, price: 200, attackerIcon: "attackerType4", defenderIcon: "defenderType4", kingIcon: "kingType4"),
     ]
     
     @Published var boughtItems: [Item] = [
-        Item(name: "Item 1", image: "birdYellow", icon: "itemIcon1"),
+        Item(name: "bg1", image: "gameBg1GE", icon: "icon1GE", section: .backgrounds, price: 500),
+        Item(name: "person1", image: "gamePerson1GE", icon: "peronIcon1GE", section: .persons, price: 200, attackerIcon: "attackerType1", defenderIcon: "defenderType1", kingIcon: "kingType1"),
     ] {
         didSet {
             saveBoughtItem()
         }
     }
     
-    @Published var currentTeamItem: Item? {
+    @Published var currentBgItem: Item? {
         didSet {
-            saveTeam()
+            saveCurrentBg()
+        }
+    }
+    
+    @Published var currentPersonItem: Item? {
+        didSet {
+            saveCurrentPerson()
         }
     }
     
     init() {
-        loadTeam()
+        loadCurrentBg()
+        loadCurrentPerson()
         loadBoughtItem()
     }
     
-    private let userDefaultsTeamKey = "saveCurrentItemImage"
+    private let userDefaultsBgKey = "userDefaultsBgKey"
+    private let userDefaultsPersonKey = "userDefaultsPersonKey"
     private let userDefaultsBoughtKey = "boughtItem"
 
     
-    func saveTeam() {
-        if let currentItem = currentTeamItem {
+    func saveCurrentBg() {
+        if let currentItem = currentBgItem {
             if let encodedData = try? JSONEncoder().encode(currentItem) {
-                UserDefaults.standard.set(encodedData, forKey: userDefaultsTeamKey)
+                UserDefaults.standard.set(encodedData, forKey: userDefaultsBgKey)
             }
         }
     }
     
-    func loadTeam() {
-        if let savedData = UserDefaults.standard.data(forKey: userDefaultsTeamKey),
+    func loadCurrentBg() {
+        if let savedData = UserDefaults.standard.data(forKey: userDefaultsBgKey),
            let loadedItem = try? JSONDecoder().decode(Item.self, from: savedData) {
-            currentTeamItem = loadedItem
+            currentBgItem = loadedItem
         } else {
-            currentTeamItem = shopTeamItems[0]
+            currentBgItem = shopTeamItems[0]
+            print("No saved data found")
+        }
+    }
+    
+    func saveCurrentPerson() {
+        if let currentItem = currentPersonItem {
+            if let encodedData = try? JSONEncoder().encode(currentItem) {
+                UserDefaults.standard.set(encodedData, forKey: userDefaultsPersonKey)
+            }
+        }
+    }
+    
+    func loadCurrentPerson() {
+        if let savedData = UserDefaults.standard.data(forKey: userDefaultsPersonKey),
+           let loadedItem = try? JSONDecoder().decode(Item.self, from: savedData) {
+            currentPersonItem = loadedItem
+        } else {
+            currentPersonItem = shopTeamItems[4]
             print("No saved data found")
         }
     }
@@ -83,4 +105,10 @@ struct Item: Codable, Hashable {
     var name: String
     var image: String
     var icon: String
+    var section: ShopSection
+    var price: Int
+    var attackerIcon = ""
+    var defenderIcon = ""
+    var kingIcon = ""
 }
+

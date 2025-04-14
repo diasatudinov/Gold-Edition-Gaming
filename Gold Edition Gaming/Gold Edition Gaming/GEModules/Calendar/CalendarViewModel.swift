@@ -1,10 +1,3 @@
-//
-//  AchievementsViewModel.swift
-//  Gold Edition Gaming
-//
-//  Created by Dias Atudinov on 14.04.2025.
-//
-
 import SwiftUI
 
 
